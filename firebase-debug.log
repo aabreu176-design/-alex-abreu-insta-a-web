@@ -1,0 +1,47 @@
+[debug] [2026-06-03T23:00:06.012Z] ----------------------------------------------------------------------
+[debug] [2026-06-03T23:00:06.018Z] Command:       C:\Program Files\nodejs\node.exe C:\Users\aabre\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\firebase.js projects:list
+[debug] [2026-06-03T23:00:06.018Z] CLI Version:   15.17.0
+[debug] [2026-06-03T23:00:06.019Z] Platform:      win32
+[debug] [2026-06-03T23:00:06.019Z] Node Version:  v24.15.0
+[debug] [2026-06-03T23:00:06.019Z] Time:          Wed Jun 03 2026 19:00:06 GMT-0400 (hora estándar de Chile)
+[debug] [2026-06-03T23:00:06.019Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-03T23:00:06.025Z] >>> [apiv2][query] GET https://firebase-public.firebaseio.com/cli.json [none]
+[debug] [2026-06-03T23:00:06.087Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-03T23:00:06.088Z] > authorizing via signed-in user (aabreu176@gmail.com)
+[debug] [2026-06-03T23:00:06.096Z] Checked if tokens are valid: false, expires at: 1780526847924
+[debug] [2026-06-03T23:00:06.096Z] Checked if tokens are valid: false, expires at: 1780526847924
+[debug] [2026-06-03T23:00:06.097Z] > refreshing access token with scopes: []
+[debug] [2026-06-03T23:00:06.100Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-06-03T23:00:06.100Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-03T23:00:06.364Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 200
+[debug] [2026-06-03T23:00:06.365Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-03T23:00:06.411Z] >>> [apiv2][query] GET https://firebase.googleapis.com/v1beta1/projects pageSize=1000
+[debug] [2026-06-03T23:00:06.420Z] <<< [apiv2][status] GET https://firebase-public.firebaseio.com/cli.json 200
+[debug] [2026-06-03T23:00:06.420Z] <<< [apiv2][body] GET https://firebase-public.firebaseio.com/cli.json {"cloudBuildErrorAfter":1594252800000,"cloudBuildWarnAfter":1590019200000,"defaultNode10After":1594252800000,"minVersion":"3.0.5","node8DeploysDisabledAfter":1613390400000,"node8RuntimeDisabledAfter":1615809600000,"node8WarnAfter":1600128000000}
+[debug] [2026-06-03T23:00:06.867Z] <<< [apiv2][status] GET https://firebase.googleapis.com/v1beta1/projects 200
+[debug] [2026-06-03T23:00:06.868Z] <<< [apiv2][body] GET https://firebase.googleapis.com/v1beta1/projects [omitted]
+[info] ┌─────────────────────────────┬─────────────────────────────┬────────────────┬──────────────────────┐
+│ Project Display Name        │ Project ID                  │ Project Number │ Resource Location ID │
+├─────────────────────────────┼─────────────────────────────┼────────────────┼──────────────────────┤
+│ Arbitraje-App               │ arbitraje-app-480305        │ 51458440768    │ [Not specified]      │
+├─────────────────────────────┼─────────────────────────────┼────────────────┼──────────────────────┤
+│ asatcambiostasasytier       │ asatcambiostasasytier       │ 108917291407   │ [Not specified]      │
+├─────────────────────────────┼─────────────────────────────┼────────────────┼──────────────────────┤
+│ calculadora asat cambios    │ calculadora-asat-cambios    │ 39805081666    │ [Not specified]      │
+├─────────────────────────────┼─────────────────────────────┼────────────────┼──────────────────────┤
+│ My First Project            │ eternal-sylph-374013        │ 338510083913   │ [Not specified]      │
+├─────────────────────────────┼─────────────────────────────┼────────────────┼──────────────────────┤
+│ Registro de TR asat cambios │ registro-de-tr-asat-cambios │ 1056904500223  │ [Not specified]      │
+└─────────────────────────────┴─────────────────────────────┴────────────────┴──────────────────────┘
+[info] 
+[info] 5 project(s) total.
+[debug] [2026-06-03T23:00:07.013Z] Error: EBUSY: resource busy or locked, unlink 'C:\Users\aabre\OneDrive\Escritorio\PROYECTOS IA\kit-instagram-web\firebase-debug.log'
+    at Object.unlinkSync (node:fs:1932:11)
+    at process.<anonymous> (C:\Users\aabre\AppData\Roaming\npm\node_modules\firebase-tools\lib\bin\cli.js:44:16)
+    at process.emit (node:events:509:28)
+    at process.exit (node:internal/process/per_thread:236:15)
+    at C:\Users\aabre\AppData\Roaming\npm\node_modules\firebase-tools\lib\command.js:131:25
+    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)
+[error] 
+[error] Error: An unexpected error has occurred.
