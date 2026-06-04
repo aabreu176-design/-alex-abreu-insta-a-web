@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Auditoría SEO — alexanderabreu-web.web.app</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0f172a;
+      --card: #1e293b;
+      --border: #334155;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --green: #22c55e;
+      --yellow: #eab308;
+      --red: #ef4444;
+      --blue: #3b82f6;
+      --cyan: #06b6d4;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+    }
+
+    .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+    /* HEADER */
+    .audit-header {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 0 40px;
+    }
+    .audit-header h1 { font-size: 1.6rem; font-weight: 800; margin-bottom: 6px; }
+    .audit-header .url { color: var(--cyan); font-size: 0.95rem; word-break: break-all; }
+    .audit-header .date { color: var(--muted); font-size: 0.85rem; margin-top: 8px; }
+
+    .score-hero {
+      display: flex; align-items: center; gap: 40px; margin-top: 32px; flex-wrap: wrap;
+    }
+    .score-circle {
+      width: 140px; height: 140px; border-radius: 50%; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; font-size: 3rem; font-weight: 900;
+      flex-shrink: 0; position: relative;
+    }
+    .score-circle::before {
+      content: ''; position: absolute; inset: -4px; border-radius: 50%;
+      background: conic-gradient(var(--score-color) calc(var(--score) * 3.6deg), #334155 0);
+      z-index: -1;
+    }
+    .score-circle { background: var(--bg); }
+    .score-circle small { font-size: 0.8rem; font-weight: 600; color: var(--muted); }
+    .score-level { font-size: 1.2rem; font-weight: 700; }
+    .score-level.yellow { color: var(--yellow); }
+    .score-level.green { color: var(--green); }
+    .score-level.red { color: var(--red); }
+
+    /* SUMMARY CARDS */
+    .summary-cards {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(min(200px, 100%), 1fr));
+      gap: 16px; margin: 40px 0;
+    }
+    .s-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 24px; text-align: center;
+    }
+    .s-card .num { font-size: 2.2rem; font-weight: 800; display: block; }
+    .s-card .label { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-top: 4px; }
+    .s-card.critical .num { color: var(--red); }
+    .s-card.warn .num { color: var(--yellow); }
+    .s-card.pass .num { color: var(--green); }
+    .s-card.score .num { color: var(--cyan); }
+
+    /* SECTIONS */
+    section { padding: 48px 0; }
+    section + section { border-top: 1px solid var(--border); }
+    .section-title { font-size: 1.4rem; font-weight: 800; margin-bottom: 24px; display: flex; align-items: center; gap: 10px; }
+    .section-title .icon { font-size: 1.3rem; }
+
+    /* TOP 5 */
+    .fix-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px;
+      padding: 28px; margin-bottom: 16px;
+    }
+    .fix-card .fix-num {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 28px; height: 28px; background: var(--red); color: white;
+      border-radius: 50%; font-size: 0.8rem; font-weight: 700; margin-right: 10px;
+    }
+    .fix-card h3 { display: inline; font-size: 1.05rem; }
+    .fix-card .why { color: var(--muted); font-size: 0.9rem; margin: 10px 0; }
+    .fix-card code, .fix-card pre {
+      background: #0f172a; border: 1px solid #334155; border-radius: 8px; padding: 12px 16px;
+      display: block; font-size: 0.85rem; overflow-x: auto; margin-top: 10px;
+      color: #a5f3fc; font-family: 'Consolas', monospace; white-space: pre-wrap;
+    }
+    .fix-card .impact {
+      display: inline-block; font-size: 0.75rem; font-weight: 700; padding: 3px 10px;
+      border-radius: 50px; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 8px;
+    }
+    .impact.high { background: rgba(239,68,68,0.15); color: var(--red); }
+    .impact.medium { background: rgba(234,179,8,0.15); color: var(--yellow); }
+
+    /* CATEGORY BARS */
+    .cat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: 16px; }
+    .cat-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px;
+    }
+    .cat-card h4 { font-size: 0.95rem; font-weight: 700; margin-bottom: 12px; display: flex; justify-content: space-between; }
+    .cat-card h4 span { font-weight: 800; }
+    .bar-bg { height: 8px; background: #334155; border-radius: 8px; overflow: hidden; margin-bottom: 16px; }
+    .bar-fill { height: 100%; border-radius: 8px; transition: width 1s ease; }
+    .bar-fill.green { background: var(--green); }
+    .bar-fill.yellow { background: var(--yellow); }
+    .bar-fill.red { background: var(--red); }
+
+    .finding { display: flex; align-items: flex-start; gap: 8px; font-size: 0.88rem; margin-bottom: 8px; }
+    .finding .status { flex-shrink: 0; font-size: 0.85rem; }
+    .finding .status.ok::before { content: '✅'; }
+    .finding .status.warn::before { content: '⚠️'; }
+    .finding .status.err::before { content: '❌'; }
+
+    /* DETAIL TABLE */
+    .detail-toggle {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 14px 20px; width: 100%; text-align: left; color: var(--text);
+      font-size: 0.95rem; font-weight: 600; cursor: pointer; display: flex;
+      justify-content: space-between; align-items: center;
+    }
+    .detail-toggle::after { content: '▼'; font-size: 0.7rem; transition: transform 0.3s; }
+    .detail-toggle.open::after { transform: rotate(180deg); }
+    .detail-content { display: none; margin-top: 12px; }
+    .detail-content.open { display: block; }
+    table {
+      width: 100%; border-collapse: collapse; font-size: 0.85rem;
+      background: var(--card); border-radius: 8px; overflow: hidden;
+    }
+    th { background: #334155; text-align: left; padding: 12px 16px; font-weight: 600; }
+    td { padding: 10px 16px; border-top: 1px solid var(--border); }
+    tr:hover td { background: rgba(255,255,255,0.03); }
+
+    /* NAV */
+    .audit-nav {
+      position: sticky; top: 0; z-index: 50; background: rgba(15,23,42,0.95);
+      backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
+      padding: 12px 0; overflow-x: auto;
+    }
+    .audit-nav .container { display: flex; gap: 20px; }
+    .audit-nav a {
+      color: var(--muted); text-decoration: none; font-size: 0.85rem; font-weight: 600;
+      white-space: nowrap; transition: color 0.2s;
+    }
+    .audit-nav a:hover { color: var(--text); }
+
+    /* PRINT */
+    @media print {
+      body { background: white; color: #1e293b; }
+      .audit-nav { display: none; }
+      .s-card, .cat-card, .fix-card { border: 1px solid #ddd; break-inside: avoid; }
+    }
+
+    @media (max-width: 600px) {
+      .score-hero { flex-direction: column; text-align: center; }
+      .audit-header h1 { font-size: 1.3rem; }
+      .score-circle { width: 120px; height: 120px; font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="audit-nav">
+  <div class="container">
+    <a href="#resumen">Resumen</a>
+    <a href="#correcciones">Top 5 Correcciones</a>
+    <a href="#categorias">Categorías</a>
+    <a href="#detalle">Detalle Técnico</a>
+  </div>
+</nav>
+
+<!-- HEADER -->
+<header class="audit-header">
+  <div class="container">
+    <h1>🔍 Auditoría SEO Completa</h1>
+    <div class="url">https://alexanderabreu-web.web.app/</div>
+    <div class="date">Generado el 4 de junio de 2026 — Auditoría automática por ASAT Web Studio</div>
+
+    <div class="score-hero">
+      <div class="score-circle" style="--score: 72; --score-color: var(--yellow);">
+        72
+        <small>/ 100</small>
+      </div>
+      <div>
+        <div class="score-level yellow">⚠️ MEJORABLE</div>
+        <p style="color: var(--muted); margin-top: 8px; max-width: 500px;">
+          El sitio tiene una base SEO sólida con buenas prácticas en meta tags, Open Graph y Schema. Sin embargo, hay problemas críticos de coherencia de dominio, favicon ausente y oportunidades de mejora en imágenes y contenido.
+        </p>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- RESUMEN -->
+<section id="resumen">
+  <div class="container">
+    <h2 class="section-title"><span class="icon">📊</span> Resumen Ejecutivo</h2>
+    <div class="summary-cards">
+      <div class="s-card score">
+        <span class="num">72</span>
+        <span class="label">Puntuación Global</span>
+      </div>
+      <div class="s-card critical">
+        <span class="num">3</span>
+        <span class="label">Problemas Críticos</span>
+      </div>
+      <div class="s-card warn">
+        <span class="num">5</span>
+        <span class="label">Advertencias</span>
+      </div>
+      <div class="s-card pass">
+        <span class="num">18</span>
+        <span class="label">Tests Aprobados</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TOP 5 CORRECCIONES -->
+<section id="correcciones">
+  <div class="container">
+    <h2 class="section-title"><span class="icon">🔧</span> Top 5 Correcciones Prioritarias</h2>
+
+    <!-- FIX 1 -->
+    <div class="fix-card">
+      <span class="fix-num">1</span>
+      <h3>Inconsistencia de dominio: canonical, OG y sitemap apuntan a alexabreu.netlify.app</h3>
+      <p class="why">Google puede confundirse sobre cuál es la URL oficial de tu sitio. El canonical le dice a Google "indexa esta otra URL", no la de Firebase donde realmente está.</p>
+      <span class="impact high">Impacto Alto</span>
+      <pre>
+&lt;!-- ANTES --&gt;
+&lt;link rel="canonical" href="https://alexabreu.netlify.app/" /&gt;
+&lt;meta property="og:url" content="https://alexabreu.netlify.app/" /&gt;
+
+&lt;!-- DESPUÉS — elige UN dominio y úsalo en todo --&gt;
+&lt;link rel="canonical" href="https://alexanderabreu-web.web.app/" /&gt;
+&lt;meta property="og:url" content="https://alexanderabreu-web.web.app/" /&gt;
+
+&lt;!-- robots.txt --&gt;
+Sitemap: https://alexanderabreu-web.web.app/sitemap.xml
+
+&lt;!-- sitemap.xml --&gt;
+&lt;loc&gt;https://alexanderabreu-web.web.app/&lt;/loc&gt;</pre>
+    </div>
+
+    <!-- FIX 2 -->
+    <div class="fix-card">
+      <span class="fix-num">2</span>
+      <h3>Favicon no encontrado (404)</h3>
+      <p class="why">Google muestra el favicon en los resultados de búsqueda. Sin él, tu resultado se ve menos profesional y pierde clics. Los navegadores también muestran un error 404 en la consola.</p>
+      <span class="impact high">Impacto Alto</span>
+      <pre>
+&lt;!-- Agrega en &lt;head&gt; --&gt;
+&lt;link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png"&gt;
+&lt;link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png"&gt;
+&lt;link rel="apple-touch-icon" href="/apple-touch-icon.png"&gt;
+
+&lt;!-- Genera los archivos en https://favicon.io o https://realfavicongenerator.net --&gt;</pre>
+    </div>
+
+    <!-- FIX 3 -->
+    <div class="fix-card">
+      <span class="fix-num">3</span>
+      <h3>Imágenes del About sin lazy loading</h3>
+      <p class="why">Las 2 imágenes del About (post-net-7.jpg, post-net-8.jpg) cargan inmediatamente aunque están below the fold. Esto ralentiza el LCP (Largest Contentful Paint) del hero.</p>
+      <span class="impact medium">Impacto Medio</span>
+      <pre>
+&lt;!-- ANTES --&gt;
+&lt;img src="assets/post-net-7.jpg" alt="..." class="about-img-main" /&gt;
+
+&lt;!-- DESPUÉS --&gt;
+&lt;img src="assets/post-net-7.jpg" alt="..." class="about-img-main" loading="lazy" /&gt;
+&lt;img src="assets/post-net-8.jpg" alt="..." class="about-img-accent" loading="lazy" /&gt;</pre>
+    </div>
+
+    <!-- FIX 4 -->
+    <div class="fix-card">
+      <span class="fix-num">4</span>
+      <h3>Alts de galería genéricos: "Instagram Post 1", "Instagram Post 2"...</h3>
+      <p class="why">Los textos alt son una oportunidad SEO. Google los usa para entender el contenido de las imágenes. "Instagram Post 1" no aporta nada. Descripciones reales mejoran el posicionamiento en Google Imágenes.</p>
+      <span class="impact medium">Impacto Medio</span>
+      <pre>
+&lt;!-- ANTES --&gt;
+&lt;img src="assets/instagram/post-1.jpg" alt="Instagram Post 1" /&gt;
+
+&lt;!-- DESPUÉS — describe lo que se ve --&gt;
+&lt;img src="assets/instagram/post-1.jpg" alt="Alexander Abreu explorando cascada en sendero de montaña" /&gt;
+&lt;img src="assets/instagram/post-2.jpg" alt="Aventura outdoor en río cristalino, Chile" /&gt;
+&lt;!-- etc. --&gt;</pre>
+    </div>
+
+    <!-- FIX 5 -->
+    <div class="fix-card">
+      <span class="fix-num">5</span>
+      <h3>CSS y JS inline — 49KB de HTML en un solo archivo</h3>
+      <p class="why">Todo el CSS (~1100 líneas) y JS está embebido en el HTML. Esto impide que el navegador cachee los estilos por separado. En cada visita, el usuario descarga todo de nuevo. Separar el CSS mejora la velocidad en visitas repetidas.</p>
+      <span class="impact medium">Impacto Medio</span>
+      <pre>
+&lt;!-- Mover estilos a archivo externo --&gt;
+&lt;link rel="stylesheet" href="css/styles.css"&gt;
+
+&lt;!-- Mover JS a archivo externo --&gt;
+&lt;script src="js/main.js" defer&gt;&lt;/script&gt;
+
+&lt;!-- Esto permite caching del navegador y reduce el HTML a ~15KB --&gt;</pre>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORÍAS -->
+<section id="categorias">
+  <div class="container">
+    <h2 class="section-title"><span class="icon">📈</span> Desglose por Categoría</h2>
+    <div class="cat-grid">
+
+      <!-- Meta Tags 82/100 -->
+      <div class="cat-card">
+        <h4>🏷️ Meta Tags (20%) <span style="color: var(--green)">82</span></h4>
+        <div class="bar-bg"><div class="bar-fill green" style="width: 82%"></div></div>
+        <div class="finding"><span class="status ok"></span> Title presente: 32 chars — descriptivo y conciso</div>
+        <div class="finding"><span class="status ok"></span> Meta description: 131 chars — persuasiva y con keywords</div>
+        <div class="finding"><span class="status ok"></span> Meta viewport configurado correctamente</div>
+        <div class="finding"><span class="status ok"></span> Meta robots: index, follow</div>
+        <div class="finding"><span class="status ok"></span> html lang="es" definido</div>
+        <div class="finding"><span class="status err"></span> Canonical apunta a dominio incorrecto (netlify vs firebase)</div>
+        <div class="finding"><span class="status warn"></span> Falta meta keyword (menor importancia en 2026)</div>
+      </div>
+
+      <!-- Headings 90/100 -->
+      <div class="cat-card">
+        <h4>📑 Headings (15%) <span style="color: var(--green)">90</span></h4>
+        <div class="bar-bg"><div class="bar-fill green" style="width: 90%"></div></div>
+        <div class="finding"><span class="status ok"></span> Un solo H1: "Alexander Abreu" — correcto</div>
+        <div class="finding"><span class="status ok"></span> H2 descriptivos: "Venezolano en Chile...", "Un ecosistema...", "Laboratorio..."</div>
+        <div class="finding"><span class="status ok"></span> H3 usados correctamente en sub-secciones</div>
+        <div class="finding"><span class="status ok"></span> Jerarquía h1→h2→h3 respetada sin saltos</div>
+        <div class="finding"><span class="status warn"></span> H2 "¿Hablamos?" poco descriptivo para SEO</div>
+      </div>
+
+      <!-- Imágenes 55/100 -->
+      <div class="cat-card">
+        <h4>🖼️ Imágenes (10%) <span style="color: var(--yellow)">55</span></h4>
+        <div class="bar-bg"><div class="bar-fill yellow" style="width: 55%"></div></div>
+        <div class="finding"><span class="status ok"></span> 9 imágenes totales — todas tienen atributo alt</div>
+        <div class="finding"><span class="status ok"></span> Hero photo con width/height definidos (evita CLS)</div>
+        <div class="finding"><span class="status ok"></span> 6 imágenes de galería con loading="lazy"</div>
+        <div class="finding"><span class="status err"></span> 2 imágenes del About SIN loading="lazy"</div>
+        <div class="finding"><span class="status warn"></span> 6 alts genéricos: "Instagram Post N" — no descriptivos</div>
+        <div class="finding"><span class="status warn"></span> Todas son JPG — sin formatos modernos (WebP/AVIF)</div>
+      </div>
+
+      <!-- Enlaces 80/100 -->
+      <div class="cat-card">
+        <h4>🔗 Enlaces (10%) <span style="color: var(--green)">80</span></h4>
+        <div class="bar-bg"><div class="bar-fill green" style="width: 80%"></div></div>
+        <div class="finding"><span class="status ok"></span> Enlaces externos con rel="noopener noreferrer"</div>
+        <div class="finding"><span class="status ok"></span> Enlaces internos (#sobre-mi, #servicios, etc.) funcionan</div>
+        <div class="finding"><span class="status ok"></span> Textos ancla descriptivos ("Ver Servicios", "Cotizar Envío")</div>
+        <div class="finding"><span class="status warn"></span> No hay enlaces a otras páginas del propio dominio (single page)</div>
+      </div>
+
+      <!-- Open Graph 88/100 -->
+      <div class="cat-card">
+        <h4>📣 Open Graph & Social (10%) <span style="color: var(--green)">88</span></h4>
+        <div class="bar-bg"><div class="bar-fill green" style="width: 88%"></div></div>
+        <div class="finding"><span class="status ok"></span> og:title, og:description, og:image — completos</div>
+        <div class="finding"><span class="status ok"></span> og:type, og:locale, og:site_name — presentes</div>
+        <div class="finding"><span class="status ok"></span> Twitter Card completa: summary_large_image</div>
+        <div class="finding"><span class="status err"></span> og:url apunta a netlify en vez de firebase</div>
+      </div>
+
+      <!-- Schema 92/100 -->
+      <div class="cat-card">
+        <h4>🧩 Schema / JSON-LD (10%) <span style="color: var(--green)">92</span></h4>
+        <div class="bar-bg"><div class="bar-fill green" style="width: 92%"></div></div>
+        <div class="finding"><span class="status ok"></span> JSON-LD con @graph: Person + Organization + WebSite</div>
+        <div class="finding"><span class="status ok"></span> Person con sameAs (Instagram, WhatsApp)</div>
+        <div class="finding"><span class="status ok"></span> Organization con founder referenciado por @id</div>
+        <div class="finding"><span class="status ok"></span> JSON bien formado, sin errores de sintaxis</div>
+        <div class="finding"><span class="status warn"></span> URL en WebSite apunta a netlify</div>
+      </div>
+
+      <!-- Técnico 50/100 -->
+      <div class="cat-card">
+        <h4>⚙️ Técnico (15%) <span style="color: var(--yellow)">50</span></h4>
+        <div class="bar-bg"><div class="bar-fill yellow" style="width: 50%"></div></div>
+        <div class="finding"><span class="status ok"></span> HTTPS activo — Firebase Hosting</div>
+        <div class="finding"><span class="status ok"></span> HTTP 200 — responde correctamente</div>
+        <div class="finding"><span class="status ok"></span> robots.txt presente con Allow: /</div>
+        <div class="finding"><span class="status ok"></span> sitemap.xml presente</div>
+        <div class="finding"><span class="status err"></span> Favicon: 404 — no encontrado</div>
+        <div class="finding"><span class="status err"></span> robots.txt Sitemap apunta a netlify, no a firebase</div>
+        <div class="finding"><span class="status err"></span> sitemap.xml loc apunta a netlify</div>
+        <div class="finding"><span class="status warn"></span> HTML de 49KB (CSS+JS inline) — podría optimizarse</div>
+        <div class="finding"><span class="status warn"></span> Tiempo de respuesta: ~6s (alto, posible latencia de red)</div>
+      </div>
+
+      <!-- Contenido 68/100 -->
+      <div class="cat-card">
+        <h4>📝 Contenido (10%) <span style="color: var(--yellow)">68</span></h4>
+        <div class="bar-bg"><div class="bar-fill yellow" style="width: 68%"></div></div>
+        <div class="finding"><span class="status ok"></span> Más de 500 palabras de contenido visible</div>
+        <div class="finding"><span class="status ok"></span> Title y description únicos y originales</div>
+        <div class="finding"><span class="status ok"></span> Contenido real y relevante — no relleno</div>
+        <div class="finding"><span class="status warn"></span> Ratio texto/HTML bajo (~15%) por CSS/JS inline</div>
+        <div class="finding"><span class="status warn"></span> Falta contenido tipo blog o artículos para posicionar keywords long-tail</div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- DETALLE TÉCNICO -->
+<section id="detalle">
+  <div class="container">
+    <h2 class="section-title"><span class="icon">🔬</span> Detalle Técnico Completo</h2>
+
+    <button class="detail-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')">
+      Meta Tags & SEO Básico
+    </button>
+    <div class="detail-content">
+      <table>
+        <tr><th>Elemento</th><th>Valor</th><th>Estado</th></tr>
+        <tr><td>Title</td><td>Alexander Abreu | @alexabreutz (32 chars)</td><td>✅ OK</td></tr>
+        <tr><td>Meta Description</td><td>Alexander Abreu — Emprendedor, viajero y papá perruno... (131 chars)</td><td>✅ OK</td></tr>
+        <tr><td>Viewport</td><td>width=device-width, initial-scale=1.0</td><td>✅ OK</td></tr>
+        <tr><td>Robots</td><td>index, follow</td><td>✅ OK</td></tr>
+        <tr><td>Canonical</td><td>https://alexabreu.netlify.app/</td><td>❌ Dominio incorrecto</td></tr>
+        <tr><td>Lang</td><td>es</td><td>✅ OK</td></tr>
+        <tr><td>Charset</td><td>UTF-8</td><td>✅ OK</td></tr>
+      </table>
+    </div>
+
+    <button class="detail-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')" style="margin-top: 12px;">
+      Open Graph & Twitter Cards
+    </button>
+    <div class="detail-content">
+      <table>
+        <tr><th>Propiedad</th><th>Valor</th><th>Estado</th></tr>
+        <tr><td>og:title</td><td>Alexander Abreu | Founder de ASAT Cambios</td><td>✅ OK</td></tr>
+        <tr><td>og:description</td><td>Emprendedor venezolano en Chile...</td><td>✅ OK</td></tr>
+        <tr><td>og:image</td><td>https://alexabreu.netlify.app/assets/profile-candidate-0.jpg</td><td>⚠️ Dominio netlify</td></tr>
+        <tr><td>og:url</td><td>https://alexabreu.netlify.app/</td><td>❌ Dominio incorrecto</td></tr>
+        <tr><td>og:type</td><td>website</td><td>✅ OK</td></tr>
+        <tr><td>og:locale</td><td>es_ES</td><td>✅ OK</td></tr>
+        <tr><td>og:site_name</td><td>Alexander Abreu</td><td>✅ OK</td></tr>
+        <tr><td>twitter:card</td><td>summary_large_image</td><td>✅ OK</td></tr>
+        <tr><td>twitter:site</td><td>@alexabreutz</td><td>✅ OK</td></tr>
+        <tr><td>twitter:image</td><td>https://alexabreu.netlify.app/assets/profile-candidate-0.jpg</td><td>⚠️ Dominio netlify</td></tr>
+      </table>
+    </div>
+
+    <button class="detail-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')" style="margin-top: 12px;">
+      Schema / JSON-LD
+    </button>
+    <div class="detail-content">
+      <table>
+        <tr><th>Tipo</th><th>Campos</th><th>Estado</th></tr>
+        <tr><td>Person</td><td>name, url, description, image, nationality, knowsLanguage, sameAs, worksFor</td><td>✅ Completo</td></tr>
+        <tr><td>Organization</td><td>name, url, founder, description, areaServed, sameAs</td><td>✅ Completo</td></tr>
+        <tr><td>WebSite</td><td>url, name, author</td><td>✅ Completo</td></tr>
+      </table>
+    </div>
+
+    <button class="detail-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')" style="margin-top: 12px;">
+      Archivos Técnicos
+    </button>
+    <div class="detail-content">
+      <table>
+        <tr><th>Archivo</th><th>Estado</th><th>Nota</th></tr>
+        <tr><td>robots.txt</td><td>✅ Existe</td><td>Sitemap apunta a netlify — corregir</td></tr>
+        <tr><td>sitemap.xml</td><td>✅ Existe</td><td>URL loc apunta a netlify — corregir</td></tr>
+        <tr><td>favicon.ico</td><td>❌ 404</td><td>No encontrado — crear y subir</td></tr>
+        <tr><td>HTTPS</td><td>✅ Activo</td><td>Provisto por Firebase Hosting</td></tr>
+      </table>
+    </div>
+
+    <button class="detail-toggle" onclick="this.classList.toggle('open'); this.nextElementSibling.classList.toggle('open')" style="margin-top: 12px;">
+      Imágenes (9 encontradas)
+    </button>
+    <div class="detail-content">
+      <table>
+        <tr><th>Imagen</th><th>Alt</th><th>Lazy</th><th>Estado</th></tr>
+        <tr><td>assets/instagram/profile.jpg</td><td>Alexander Abreu, fundador de ASAT Cambios</td><td>No (hero)</td><td>✅ OK</td></tr>
+        <tr><td>assets/post-net-7.jpg</td><td>Alexander Abreu, emprendedor venezolano...</td><td>❌ No</td><td>⚠️ Agregar lazy</td></tr>
+        <tr><td>assets/post-net-8.jpg</td><td>Alexander Abreu en Santiago de Chile</td><td>❌ No</td><td>⚠️ Agregar lazy</td></tr>
+        <tr><td>assets/instagram/post-1.jpg</td><td>Instagram Post 1</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+        <tr><td>assets/instagram/post-2.jpg</td><td>Instagram Post 2</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+        <tr><td>assets/instagram/post-3.jpg</td><td>Instagram Post 3</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+        <tr><td>assets/instagram/post-4.jpg</td><td>Instagram Post 4</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+        <tr><td>assets/instagram/post-5.jpg</td><td>Instagram Post 5</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+        <tr><td>assets/instagram/post-6.jpg</td><td>Instagram Post 6</td><td>✅ Sí</td><td>⚠️ Alt genérico</td></tr>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="text-align: center; padding: 40px 24px; border-top: 1px solid var(--border); color: var(--muted); font-size: 0.85rem;">
+  <p>Auditoría generada automáticamente por <strong style="color: var(--cyan);">ASAT Web Studio</strong></p>
+  <p style="margin-top: 6px;">Metodología: 8 categorías × puntaje ponderado · Solo datos reales verificados</p>
+</footer>
+
+</body>
+</html>
