@@ -1410,6 +1410,17 @@
       box-shadow: 0 8px 20px rgba(52, 211, 153, 0.3);
     }
 
+    .eco-btn-cambios-solid {
+      background: #34d399;
+      color: #0f172a;
+      border: 2px solid #34d399;
+    }
+
+    .eco-btn-cambios-solid:hover {
+      box-shadow: 0 8px 20px rgba(52, 211, 153, 0.4);
+      filter: brightness(1.1);
+    }
+
     .eco-btn-web {
       color: #38bdf8;
       border: 2px solid #38bdf8;
@@ -1437,8 +1448,12 @@
           <h3 class="eco-card-title">Asat Cambios<span>(Remesas & Divisas)</span></h3>
           <p class="eco-card-desc">Alcance global: operamos en más de 12 países. Lo que cotizas es lo que llega.
             Procesamos tu gestión de forma inmediata, tu seguridad es nuestra prioridad absoluta.</p>
-          <a href="https://wa.me/56937484821" target="_blank" rel="noopener noreferrer"
-            class="eco-btn eco-btn-cambios">Gestionar Divisas</a>
+          <div style="display: flex; flex-direction: column; gap: 12px; margin-top: auto;">
+            <a href="https://web-asat-servicios.web.app/cambios.html#calculator" target="_blank" rel="noopener noreferrer"
+              class="eco-btn eco-btn-cambios-solid">💱 Cotizar Envío</a>
+            <a href="https://wa.me/56937484821" target="_blank" rel="noopener noreferrer"
+              class="eco-btn eco-btn-cambios">💬 Chat de WhatsApp</a>
+          </div>
         </div>
 
         <!-- División Web -->
